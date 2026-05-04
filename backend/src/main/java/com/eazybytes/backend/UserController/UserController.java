@@ -1,0 +1,39 @@
+package com.eazybytes.backend.UserController;
+
+import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    @GetMapping(path = {"/{userId}/posts/{postId}", "/user/{userId}"})
+    public String searchUserPost(@PathVariable Long userId, @PathVariable(required = false) Long postId) {
+        String response;
+        if (postId == null) {
+            response = "Fetched user id with " + userId;
+        } else {
+            response = "Fetched user id with " + userId + " and  post id with " + postId;
+        }
+        return response;
+    }
+
+    @GetMapping("/{userId}/orders/{orderId}")
+    public String searchUserOrder(@PathVariable(name = "userId") Long customerId, @PathVariable Long orderId) {
+           return  "Fetched user id with " + customerId + " and  order id with " + orderId;
+    }
+
+    @GetMapping("/{userId}/address/{addressId}")
+    public String searchUserDetails(@PathVariable Map<String, String> pathVariablesMap) {
+        return  "Fetched user id with: " + pathVariablesMap.get("userId") + " and  address id with: " + pathVariablesMap.get("addressId");
+    }
+
+    @GetMapping("/search")
+    public String searchUser(@RequestParam(required = false, defaultValue = "Suman") String name, @RequestParam String gender) {
+        return "Fetched user " + name + " with gender: " + gender;
+    }
+
+    @GetMapping("/search/map")
+    public String searchUserWithMapQueryParams(@RequestParam Map<String, String> requestParamsMap) {
+        return "Fetched user " + requestParamsMap.get("name") + " with gender: " + requestParamsMap.get("gender");
+    }
+}

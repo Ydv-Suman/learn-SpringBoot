@@ -5,20 +5,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "COMPANIES")
 @Getter
 @Setter
-public class Company {
+public class Company extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID",nullable = false)
+    @Column(name = "ID", nullable = false)
     private Long id;
 
-    @Column(name = "NAME",nullable = false,unique = true)
+    @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 
     @Column(name = "LOGO", length = 500)
@@ -49,16 +50,7 @@ public class Company {
     @Column(name = "WEBSITE", length = 500)
     private String website;
 
-    @Column(name = "CREATED_AT", nullable = false)
-    private Instant createdAt;
-
-    @Column(name = "CREATED_BY", nullable = false, length = 20)
-    private String createdBy;
-
-    @Column(name = "UPDATED_AT")
-    private Instant updatedAt;
-
-    @Column(name = "UPDATED_BY", length = 20)
-    private String updatedBy;
+    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Job> jobs = new ArrayList<>();
 
 }

@@ -31,13 +31,4 @@ public class ContactController {
                     .body("Request processing failed");
         }
     }
-
-    @GetMapping(version = "1.0")
-    public ResponseEntity<String> fetchOpenContact(@RequestParam
-                                                       @Validated
-                                                       @NotBlank(message = "status can't be blank")
-                                                       @Size(min = 3, max = 10, message = "status must be between 3 and 10 characters")
-                                                       String status){
-        return ResponseEntity.ok().body("Open Contacts : " + status);
-    }
 }

@@ -18,10 +18,8 @@ public class ContactController {
 
     private final IContactService contactService;
 
-
-    @PostMapping(path = "public", version = "1.0")
+    @PostMapping(path = "/public", version = "1.0")
     public ResponseEntity<String> saveContactMsg(@RequestBody @Valid ContactRequestDto contactRequestDto) {
-
         boolean isSaved =  contactService.saveContact(contactRequestDto);
         if (isSaved) {
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -31,4 +29,5 @@ public class ContactController {
                     .body("Request processing failed");
         }
     }
+
 }

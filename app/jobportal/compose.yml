@@ -6,6 +6,6 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: jobportaldb
+      MYSQL_DATABASE: jobportal
     volumes:
-      - /Users/sumanyadav/jobportal-data:/var/lib/mysql
+      - /Users/eazybytes/Desktop/jobportal-data:/var/lib/mysql

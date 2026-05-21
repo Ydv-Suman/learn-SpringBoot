@@ -1,5 +1,6 @@
 package com.eazybytes.jobportal.company.service.impl;
 
+import com.eazybytes.jobportal.company.service.ICompanyService;
 import com.eazybytes.jobportal.dto.CompanyDto;
 import com.eazybytes.jobportal.dto.JobDto;
 import com.eazybytes.jobportal.entity.Company;
@@ -18,13 +19,9 @@ public class CompanyServiceImpl implements ICompanyService {
 
     private final CompanyRepository companyRepository;
 
-//    public CompanyServiceImpl(CompanyRepository companyRepository) {
-//        this.companyRepository = companyRepository;
-//    }
-
     @Override
     public List<CompanyDto> getAllCompanies() {
-        List<Company> companyList =  companyRepository.findAll();
+        List<Company> companyList =companyRepository.findAll();
         return companyList.stream().map(this::transformCompanyToDto).collect(Collectors.toList());
     }
 
@@ -66,4 +63,5 @@ public class CompanyServiceImpl implements ICompanyService {
                 job.getStatus()
         );
     }
+
 }

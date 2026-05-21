@@ -5,13 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
-@Entity
-@Table(name = "CONTACTS")
 @Getter
 @Setter
+@Entity
+@Table(name = "contacts")
 public class Contact extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

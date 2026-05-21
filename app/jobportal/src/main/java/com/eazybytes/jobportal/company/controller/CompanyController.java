@@ -12,20 +12,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/companies")
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public class CompanyController {
 
-    private  final ICompanyService companyService;
-
-//    @Autowired
-//    public CompanyController(ICompanyService companyService) {
-//        this.companyService = companyService;
-//    }
+    private final ICompanyService companyService;
 
     @GetMapping(path = "/public", version = "1.0")
-    public ResponseEntity<List<CompanyDto>> getAllCompanies(){
-        List<CompanyDto> companiesList = companyService.getAllCompanies();
-        return ResponseEntity.ok().body(companiesList);
+    public ResponseEntity<List<CompanyDto>> getAllCompanies() {
+        List<CompanyDto> companyList = companyService.getAllCompanies();
+        return ResponseEntity.ok().body(companyList);
     }
 
 }

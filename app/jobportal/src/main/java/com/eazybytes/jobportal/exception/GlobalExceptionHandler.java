@@ -1,6 +1,7 @@
 package com.eazybytes.jobportal.exception;
 
 import com.eazybytes.jobportal.dto.ErrorResponseDto;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -18,10 +19,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-public class GlobalException {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleException(Exception exception, WebRequest webRequest){
+    public ResponseEntity<ErrorResponseDto> handleException(Exception exception, WebRequest webRequest) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 webRequest.getDescription(false), HttpStatus.INTERNAL_SERVER_ERROR,
                 exception.getMessage(), LocalDateTime.now());
@@ -53,7 +54,6 @@ public class GlobalException {
         return ResponseEntity.badRequest().body(errors);
     }
 
-
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<ErrorResponseDto> handleNullException(Exception exception, WebRequest webRequest) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
@@ -61,4 +61,5 @@ public class GlobalException {
                 "A NullPointerException occurred due to : "+exception.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

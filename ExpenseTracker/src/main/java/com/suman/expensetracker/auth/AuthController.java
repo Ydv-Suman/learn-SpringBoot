@@ -104,7 +104,8 @@ public class AuthController {
         user.setEmail(normalizedEmail);
         user.setPasswordHash(passwordEncoder.encode(registerRequestDto.password()));
         expenseTrackerUserRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User Registered Successfully");
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "User Registered Successfully"));
     }
 
 }

@@ -10,6 +10,23 @@ public class PathConfig {
 
     @Bean("publicPaths")
     public List<String> publicPaths() {
-        return List.of("/auth/login", "/auth/register");
+        return List.of(
+                "/",
+                "/index.html",
+                "/styles.css",
+                "/app.js",
+                "/favicon.ico",
+                "/assets/**",
+                "/auth/login",
+                "/auth/register",
+                "/csrf-token"
+        );
     }
+    @Bean("securePaths")
+    public List<String> securePaths() {
+        return List.of(
+                "/categories/**"
+        );
+    }
+
 }

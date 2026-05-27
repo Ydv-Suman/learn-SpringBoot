@@ -37,6 +37,9 @@ public class ExpenseTrackerUser extends BaseEntity {
     @OneToMany(mappedBy = "expenseTrackerUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExpenseList> expenseLists = new ArrayList<>();
 
+    @OneToMany(mappedBy = "expenseTrackerUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExpenseCategory> expenseCategories = new ArrayList<>();
+
     public void addExpense(ExpenseList expenseList) {
         expenseLists.add(expenseList);
         expenseList.setExpenseTrackerUser(this);
@@ -45,5 +48,15 @@ public class ExpenseTrackerUser extends BaseEntity {
     public void removeExpense(ExpenseList expenseList) {
         expenseLists.remove(expenseList);
         expenseList.setExpenseTrackerUser(null);
+    }
+
+    public void addExpenseCategory(ExpenseCategory expenseCategory) {
+        expenseCategories.add(expenseCategory);
+        expenseCategory.setExpenseTrackerUser(this);
+    }
+
+    public void removeExpenseCategory(ExpenseCategory expenseCategory) {
+        expenseCategories.remove(expenseCategory);
+        expenseCategory.setExpenseTrackerUser(null);
     }
 }

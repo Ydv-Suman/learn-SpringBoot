@@ -53,7 +53,8 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                                 .build().parseSignedClaims(jwt).getPayload();
                         String email = String.valueOf(claims.get("email"));
                         Authentication authentication = new UsernamePasswordAuthenticationToken(email,
-                                null);
+                                null,
+                                AuthorityUtils.createAuthorityList("ROLE_USER"));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }

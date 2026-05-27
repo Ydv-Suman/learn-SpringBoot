@@ -25,6 +25,11 @@ public class ExpenseCategory extends BaseEntity {
     @Column(name = "CATEGORY_NAME", nullable = false)
     private String categoryName;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "USER_ID", nullable = false)
+    private ExpenseTrackerUser expenseTrackerUser;
+
     @OneToMany(mappedBy = "expenseCategory")
     private List<ExpenseList> expenseLists = new ArrayList<>();
 }

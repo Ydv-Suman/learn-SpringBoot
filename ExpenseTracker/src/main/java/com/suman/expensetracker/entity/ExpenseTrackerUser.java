@@ -6,10 +6,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter @Setter
 @Entity
-@Table(name = "USERS")
-public class ExpenseTrackerUser {
+@Table(name = "users")
+public class ExpenseTrackerUser extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +26,24 @@ public class ExpenseTrackerUser {
 
     @Size(max=70)
     @NotNull
-    @Column(name =  "Email", nullable = false)
+    @Column(name =  "EMAIL", nullable = false)
     private String email;
 
     @Size(max=200)
     @NotNull
     @Column(name = "HASHED_PASSWORD", nullable = false)
     private String passwordHash;
+
+    @OneToMany(mappedBy = "expenseTrackerUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExpenseList> expenseLists = new ArrayList<>();
+
+    public void addExpense(ExpenseList expenseList) {
+        expenseLists.add(expenseList);
+        expenseList.setExpenseTrackerUser(this);
+    }
+
+    public void removeExpense(ExpenseList expenseList) {
+        expenseLists.remove(expenseList);
+        expenseList.setExpenseTrackerUser(null);
+    }
 }

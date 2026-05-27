@@ -1,5 +1,6 @@
 package com.suman.expensetracker.security;
 
+import com.suman.expensetracker.security.filter.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +12,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +33,9 @@ public class ExpenseTrackerSecurityConfig {
                     publicPaths.forEach(path -> requests.requestMatchers(path).permitAll());
                     requests.anyRequest().denyAll();
                 })
+                .addFilterBefore(new JwtTokenValidatorFilter(publicPaths), BasicAuthenticationFilter.class)
+                .formLogin(flc -> flc.disable())
+                .httpBasic(withDefaults())
                 .build();
     }
 

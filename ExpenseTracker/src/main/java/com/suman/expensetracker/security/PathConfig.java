@@ -8,10 +8,8 @@ import java.util.List;
 @Configuration
 public class PathConfig {
 
-    @Bean(name = "publicPaths")
+    @Bean("publicPaths")
     public List<String> publicPaths() {
-        return List.of(
-                "/auth/**"
-        );
+        return List.of("/auth/login", "/auth/register");
     }
 }

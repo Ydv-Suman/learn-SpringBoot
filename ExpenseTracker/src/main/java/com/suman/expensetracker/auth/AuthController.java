@@ -6,6 +6,7 @@ import com.suman.expensetracker.dto.RegisterRequestDto;
 import com.suman.expensetracker.dto.UserDto;
 import com.suman.expensetracker.entity.ExpenseTrackerUser;
 import com.suman.expensetracker.repository.ExpenseTrackerUserRepository;
+import com.suman.expensetracker.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
@@ -36,22 +37,34 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final ExpenseTrackerUserRepository expenseTrackerUserRepository;
     private final CompromisedPasswordChecker compromisedPasswordChecker;
+    private final JWTUtil jwtUtil;
 
 
     @PostMapping("/login")
     private ResponseEntity<LoginResponseDto> loginUser(@RequestBody LoginRequestDto loginRequestDto) {
 
         try{
+            String normalizedEmail = loginRequestDto.email().trim().toLowerCase(Locale.ROOT);
             var resultAuthentication = authenticationConfiguration.getAuthenticationManager()
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequestDto.email(), loginRequestDto.password()));
-            var userDto = new UserDto();
+                    .authenticate(new UsernamePasswordAuthenticationToken(normalizedEmail, loginRequestDto.password()));
+            String jwtToken = jwtUtil.generateJwtToekn(resultAuthentication);
+            UserDto userDto = expenseTrackerUserRepository.findByEmail(normalizedEmail)
+                    .map(user -> {
+                        UserDto dto = new UserDto();
+                        dto.setName(user.getName());
+                        dto.setEmail(user.getEmail());
+                        return dto;
+                    })
+                    .orElseGet(UserDto::new);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new LoginResponseDto("Login Successful",
-                            userDto));
+                            userDto,
+                            jwtToken));
 
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponseDto("Invalid Credentials", null));
-        }catch (AuthenticationException ex) {
+        } catch (BadCredentialsException ex) {
+            return buildErrorResponse(HttpStatus.UNAUTHORIZED,
+                    "Invalid username or password");
+        } catch (AuthenticationException ex) {
             return buildErrorResponse(HttpStatus.UNAUTHORIZED,
                     "Authentication failed");
         } catch (Exception ex) {
@@ -63,7 +76,7 @@ public class AuthController {
     private ResponseEntity<LoginResponseDto> buildErrorResponse(HttpStatus status, String message) {
         return ResponseEntity
                 .status(status)
-                .body(new LoginResponseDto(message, null));
+                .body(new LoginResponseDto(message, null, null));
     }
 
 

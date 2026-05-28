@@ -37,6 +37,7 @@ public class ExpenseListServiceImpl implements IExpenseListService {
                         expenseList.getId(),
                         expenseList.getName(),
                         expenseList.getAmount(),
+                        expenseList.getExpenseCategory().getId(),
                         expenseList.getExpenseCategory().getCategoryName()
                 ))
                 .toList();
@@ -69,4 +70,38 @@ public class ExpenseListServiceImpl implements IExpenseListService {
         expenseListRepository.save(expenseList);
     }
 
+
+    @Override
+    public void updateExpenseList(Long id, ExpenseListRequestDto requestDto) {
+        ExpenseTrackerUser currentUser = currentUserService.getCurrentUser();
+        ExpenseList expenseList = expenseListRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense list not found"));
+        if (!expenseList.getExpenseTrackerUser().getEmail().equals(currentUser.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense list not found");
+        }
+
+        String normalizedListName = requestDto.listName().trim();
+        BigDecimal normalizedAmount = requestDto.amount();
+        ExpenseCategory category = expenseCategoryRepository.findById(requestDto.categoryId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+        if (!category.getExpenseTrackerUser().getEmail().equals(currentUser.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
+        }
+
+        expenseListRepository.findByExpenseTrackerUser_EmailAndNameIgnoreCase(currentUser.getEmail(), normalizedListName)
+                .filter(existingExpenseList -> !existingExpenseList.getId().equals(id))
+                .ifPresent(existingExpenseList -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expense list already exists");
+                });
+        expenseList.setName(normalizedListName);
+        expenseList.setAmount(normalizedAmount);
+        expenseList.setExpenseCategory(category);
+        expenseListRepository.save(expenseList);
+
+    }
+
+    @Override
+    public void deleteExpenseList(Long id) {
+
+    }
 }

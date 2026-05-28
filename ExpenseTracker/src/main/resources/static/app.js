@@ -5,6 +5,7 @@ const state = {
     token: localStorage.getItem("expenseTrackerToken") || "",
     user: JSON.parse(localStorage.getItem("expenseTrackerUser") || "null"),
     editingCategoryId: null,
+    editingExpenseListId: null,
     categories: [],
     expenseLists: [],
 };
@@ -26,6 +27,7 @@ const elements = {
     expenseListList: document.getElementById("expense-list-list"),
     expenseCategorySelect: document.getElementById("expense-category-select"),
     expenseListSubmitButton: document.getElementById("expense-list-submit-button"),
+    expenseListCancelButton: document.getElementById("expense-list-cancel-button"),
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
     categoryForm: document.getElementById("category-form"),
@@ -55,6 +57,17 @@ function setCategoryFormMode(editingCategoryId) {
     setText(elements.categoryStatus, isEditing ? `Editing category #${editingCategoryId}.` : "");
     if (!isEditing) {
         elements.categoryNameInput.value = "";
+    }
+}
+
+function setExpenseListFormMode(editingExpenseListId) {
+    state.editingExpenseListId = editingExpenseListId;
+    const isEditing = editingExpenseListId !== null;
+
+    elements.expenseListSubmitButton.textContent = isEditing ? "Save list" : "Add list";
+    elements.expenseListCancelButton.classList.toggle("hidden", !isEditing);
+    if (!isEditing) {
+        resetForm(elements.expenseListForm);
     }
 }
 
@@ -93,6 +106,7 @@ function setView() {
     elements.dashboardPanel.classList.toggle("hidden", !isAuthed);
     if (!isAuthed) {
         setCategoryFormMode(null);
+        setExpenseListFormMode(null);
         setDashboardView("categories");
         renderCategories([]);
         renderExpenseLists([]);
@@ -247,17 +261,39 @@ function renderExpenseLists(items) {
     elements.expenseListList.innerHTML = items
         .map(
             (item) => `
-                <li class="expense-row">
+                <li class="expense-row" data-expense-list-id="${item.id}">
                     <div class="expense-copy">
                         <span class="expense-name">${escapeHtml(item.listName)}</span>
+                        <span class="expense-category">${escapeHtml(item.category || "")}</span>
                     </div>
                     <div class="expense-actions">
                         <span class="expense-amount">${escapeHtml(formatAmount(item.amount))}</span>
+                        <button type="button" class="ghost-button secondary edit-expense-list-button"
+                            data-expense-list-id="${item.id}"
+                            data-expense-list-name="${escapeHtml(item.listName)}"
+                            data-expense-list-amount="${escapeHtml(item.amount)}"
+                            data-expense-list-category-id="${item.categoryId}"
+                        >Edit</button>
                     </div>
                 </li>
             `
         )
         .join("");
+
+    Array.from(document.querySelectorAll(".edit-expense-list-button")).forEach((button) => {
+        button.addEventListener("click", () => {
+            const expenseListId = Number(button.dataset.expenseListId);
+            const expenseListName = button.dataset.expenseListName || "";
+            const expenseListAmount = button.dataset.expenseListAmount || "";
+            const expenseListCategoryId = button.dataset.expenseListCategoryId || "";
+
+            elements.expenseListForm.elements.listName.value = expenseListName;
+            elements.expenseListForm.elements.amount.value = expenseListAmount;
+            elements.expenseListForm.elements.categoryId.value = expenseListCategoryId;
+            setExpenseListFormMode(expenseListId);
+            elements.expenseListForm.elements.listName.focus();
+        });
+    });
 }
 
 function formatAmount(value) {
@@ -327,6 +363,7 @@ async function loadExpenseLists() {
 async function handleExpenseListSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
+    const isEditing = state.editingExpenseListId !== null;
     setText(elements.expenseListStatus, "Saving...");
 
     const payload = Object.fromEntries(new FormData(form).entries());
@@ -334,12 +371,21 @@ async function handleExpenseListSubmit(event) {
     payload.categoryId = Number(payload.categoryId);
 
     try {
-        await request("/expense-lists/add", {
-            method: "POST",
-            body: JSON.stringify(payload),
-        });
+        if (!isEditing) {
+            await request("/expense-lists/add", {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+            setText(elements.expenseListStatus, "Expense list created successfully.");
+        } else {
+            await request(`/expense-lists/${state.editingExpenseListId}`, {
+                method: "PUT",
+                body: JSON.stringify(payload),
+            });
+            setText(elements.expenseListStatus, "Expense list updated.");
+        }
         resetForm(form);
-        setText(elements.expenseListStatus, "Expense list created successfully.");
+        setExpenseListFormMode(null);
         await loadExpenseLists();
     } catch (error) {
         setText(elements.expenseListStatus, error.message);
@@ -403,7 +449,6 @@ async function handleCategorySubmit(event) {
                 method: "POST",
                 body: JSON.stringify(payload),
             });
-            setText(elements.categoryStatus, "Category added.");
         } else {
             await request(`/categories/${state.editingCategoryId}`, {
                 method: "PUT",
@@ -434,6 +479,10 @@ elements.expenseListForm.addEventListener("submit", handleExpenseListSubmit);
 elements.categoryCancelButton.addEventListener("click", () => {
     resetForm(elements.categoryForm);
     setCategoryFormMode(null);
+});
+elements.expenseListCancelButton.addEventListener("click", () => {
+    resetForm(elements.expenseListForm);
+    setExpenseListFormMode(null);
 });
 elements.logoutButton.addEventListener("click", () => {
     clearSession();

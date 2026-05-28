@@ -15,6 +15,4 @@ public interface IExpenseCategoryService {
 
     void deleteCategory(Long id);
 
-
-
 }

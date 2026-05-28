@@ -12,4 +12,6 @@ public interface ExpenseListRepository extends JpaRepository<ExpenseList, Long> 
 
     List<ExpenseList> findAllByExpenseTrackerUser_EmailOrderByNameAsc(String email);
 
+
+
 }

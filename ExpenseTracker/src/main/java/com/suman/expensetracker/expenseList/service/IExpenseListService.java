@@ -12,4 +12,8 @@ public interface IExpenseListService {
 
     void addExpenseList(ExpenseListRequestDto requestDto);
 
+    void updateExpenseList(Long id, ExpenseListRequestDto requestDto);
+
+    void deleteExpenseList(Long id);
+
 }

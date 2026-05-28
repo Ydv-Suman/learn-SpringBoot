@@ -5,8 +5,16 @@ import com.suman.expensetracker.dto.ExpenseCategoryResponseDto;
 
 import java.util.List;
 
-public interface ExpenseCategoryService {
-    ExpenseCategoryResponseDto addCategory(ExpenseCategoryRequestDto requestDto);
+public interface IExpenseCategoryService {
 
     List<ExpenseCategoryResponseDto> getAllCategories();
+
+    ExpenseCategoryResponseDto addCategory(ExpenseCategoryRequestDto requestDto);
+
+    ExpenseCategoryResponseDto updateCategory(Long id, ExpenseCategoryRequestDto requestDto);
+
+    void deleteCategory(Long id);
+
+
+
 }

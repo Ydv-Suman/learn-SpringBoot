@@ -169,6 +169,12 @@ button {
     align-items: end;
 }
 
+.form-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
 label {
     display: grid;
     gap: 6px;
@@ -200,6 +206,24 @@ button[type="submit"],
 .ghost-button {
     background: transparent;
     color: var(--text);
+}
+
+.ghost-button.secondary {
+    min-height: 40px;
+    padding-inline: 14px;
+    background: var(--surface);
+}
+
+.ghost-button.danger {
+    min-height: 40px;
+    padding-inline: 14px;
+    border-color: #e2b4b4;
+    background: #fff7f7;
+    color: #a83a3a;
+}
+
+.ghost-button.danger:hover {
+    background: #ffecec;
 }
 
 button:hover {
@@ -236,6 +260,25 @@ button:active {
     border-bottom: 1px solid var(--border);
 }
 
+.category-row {
+    align-items: flex-start;
+}
+
+.category-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.category-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-category-button {
+    min-height: 38px;
+}
+
 .empty {
     color: var(--muted);
 }
@@ -263,5 +306,18 @@ button:active {
 
     .panel {
         padding: 18px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-row {
+        align-items: stretch;
+    }
+
+    .category-actions {
+        justify-content: flex-start;
     }
 }

@@ -3,6 +3,7 @@ const state = {
     csrfToken: "",
     token: localStorage.getItem("expenseTrackerToken") || "",
     user: JSON.parse(localStorage.getItem("expenseTrackerUser") || "null"),
+    editingCategoryId: null,
 };
 
 const elements = {
@@ -16,6 +17,9 @@ const elements = {
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
     categoryForm: document.getElementById("category-form"),
+    categorySubmitButton: document.getElementById("category-submit-button"),
+    categoryCancelButton: document.getElementById("category-cancel-button"),
+    categoryNameInput: document.querySelector('#category-form input[name="categoryName"]'),
     logoutButton: document.getElementById("logout-button"),
     tabs: Array.from(document.querySelectorAll("[data-mode]")),
 };
@@ -27,6 +31,18 @@ function setText(target, message) {
 function resetForm(form) {
     if (form && typeof form.reset === "function") {
         form.reset();
+    }
+}
+
+function setCategoryFormMode(editingCategoryId) {
+    state.editingCategoryId = editingCategoryId;
+    const isEditing = editingCategoryId !== null;
+
+    elements.categorySubmitButton.textContent = isEditing ? "Save" : "Add";
+    elements.categoryCancelButton.classList.toggle("hidden", !isEditing);
+    setText(elements.categoryStatus, isEditing ? `Editing category #${editingCategoryId}.` : "");
+    if (!isEditing) {
+        elements.categoryNameInput.value = "";
     }
 }
 
@@ -51,6 +67,7 @@ function setView() {
     elements.authPanel.classList.toggle("hidden", isAuthed);
     elements.dashboardPanel.classList.toggle("hidden", !isAuthed);
     if (!isAuthed) {
+        setCategoryFormMode(null);
         renderCategories([]);
     }
 }
@@ -125,13 +142,51 @@ function renderCategories(items) {
     elements.categoryList.innerHTML = items
         .map(
             (item) => `
-                <li>
-                    <span class="category-name">${escapeHtml(item.categoryName)}</span>
-                    <span class="message">#${item.id}</span>
+                <li class="category-row">
+                    <div class="category-copy">
+                        <span class="category-name">${escapeHtml(item.categoryName)}</span>
+                    </div>
+                    <div class="category-actions">
+                        <button type="button" class="ghost-button secondary edit-category-button" data-category-id="${item.id}" data-category-name="${escapeHtml(item.categoryName)}">Edit</button>
+                        <button type="button" class="ghost-button danger delete-category-button" data-category-id="${item.id}" data-category-name="${escapeHtml(item.categoryName)}">Delete</button>
+                    </div>
                 </li>
             `
         )
         .join("");
+
+    Array.from(document.querySelectorAll(".edit-category-button")).forEach((button) => {
+        button.addEventListener("click", () => {
+            const categoryId = Number(button.dataset.categoryId);
+            const categoryName = button.dataset.categoryName || "";
+            elements.categoryNameInput.value = categoryName;
+            setCategoryFormMode(categoryId);
+            elements.categoryNameInput.focus();
+        });
+    });
+
+    Array.from(document.querySelectorAll(".delete-category-button")).forEach((button) => {
+        button.addEventListener("click", async () => {
+            const categoryId = Number(button.dataset.categoryId);
+            const categoryName = button.dataset.categoryName || "this category";
+            const confirmed = window.confirm(`Delete ${categoryName}?`);
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                await request(`/categories/${categoryId}`, { method: "DELETE" });
+                if (state.editingCategoryId === categoryId) {
+                    resetForm(elements.categoryForm);
+                    setCategoryFormMode(null);
+                }
+                await loadCategories();
+                setText(elements.categoryStatus, "Category deleted.");
+            } catch (error) {
+                setText(elements.categoryStatus, error.message);
+            }
+        });
+    });
 }
 
 function escapeHtml(value) {
@@ -209,18 +264,28 @@ async function handleRegister(event) {
 async function handleCategorySubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
+    const successMessage = state.editingCategoryId === null ? "Category added." : "Category updated.";
     setText(elements.categoryStatus, "Saving...");
 
     const payload = Object.fromEntries(new FormData(form).entries());
 
     try {
-        await request("/categories/add", {
-            method: "POST",
-            body: JSON.stringify(payload),
-        });
+        if (state.editingCategoryId === null) {
+            await request("/categories/add", {
+                method: "POST",
+                body: JSON.stringify(payload),
+            });
+            setText(elements.categoryStatus, "Category added.");
+        } else {
+            await request(`/categories/${state.editingCategoryId}`, {
+                method: "PUT",
+                body: JSON.stringify(payload),
+            });
+        }
         resetForm(form);
+        setCategoryFormMode(null);
         await loadCategories();
-        setText(elements.categoryStatus, "Category added.");
+        setText(elements.categoryStatus, successMessage);
     } catch (error) {
         setText(elements.categoryStatus, error.message);
     }
@@ -233,6 +298,10 @@ elements.tabs.forEach((tab) => {
 elements.loginForm.addEventListener("submit", handleLogin);
 elements.registerForm.addEventListener("submit", handleRegister);
 elements.categoryForm.addEventListener("submit", handleCategorySubmit);
+elements.categoryCancelButton.addEventListener("click", () => {
+    resetForm(elements.categoryForm);
+    setCategoryFormMode(null);
+});
 elements.logoutButton.addEventListener("click", () => {
     clearSession();
     setView();

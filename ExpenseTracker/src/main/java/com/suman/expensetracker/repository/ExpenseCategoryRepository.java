@@ -10,4 +10,5 @@ public interface ExpenseCategoryRepository extends JpaRepository<ExpenseCategory
     Optional<ExpenseCategory> findByExpenseTrackerUser_EmailAndCategoryNameIgnoreCase(String email, String categoryName);
 
     List<ExpenseCategory> findAllByExpenseTrackerUser_EmailOrderByCategoryNameAsc(String email);
+
 }

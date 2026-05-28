@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <meta name="description" content="Minimal expense tracker interface.">
-    <link rel="stylesheet" href="/styles.css?v=2">
+    <link rel="stylesheet" href="/styles.css?v=4">
 </head>
 <body>
 <div class="shell">
@@ -75,7 +75,10 @@
                     <span>Category</span>
                     <input type="text" name="categoryName" placeholder="Food" required>
                 </label>
-                <button type="submit">Add</button>
+                <div class="form-actions">
+                    <button type="submit" id="category-submit-button">Add</button>
+                    <button type="button" class="ghost-button secondary hidden" id="category-cancel-button">Cancel</button>
+                </div>
             </form>
 
             <p class="message" id="category-status" aria-live="polite"></p>
@@ -87,6 +90,6 @@
     </main>
 </div>
 
-<script src="/app.js?v=2"></script>
+<script src="/app.js?v=4"></script>
 </body>
 </html>

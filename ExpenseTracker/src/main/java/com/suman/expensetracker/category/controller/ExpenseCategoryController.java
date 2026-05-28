@@ -31,17 +31,18 @@ public class ExpenseCategoryController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ExpenseCategoryResponseDto> addCategory(@Valid @RequestBody ExpenseCategoryRequestDto requestDto) {
-        ExpenseCategoryResponseDto responseDto = expenseCategoryService.addCategory(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    public ResponseEntity<Void> addCategory(@Valid @RequestBody ExpenseCategoryRequestDto requestDto) {
+        expenseCategoryService.addCategory(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExpenseCategoryResponseDto> updateCategory(
+    public ResponseEntity<Void> updateCategory(
             @PathVariable Long id,
             @Valid @RequestBody ExpenseCategoryRequestDto requestDto
     ) {
-        return ResponseEntity.ok(expenseCategoryService.updateCategory(id, requestDto));
+        expenseCategoryService.updateCategory(id, requestDto);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")

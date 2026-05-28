@@ -1,4 +1,4 @@
-package com.suman.expensetracker.auth;
+package com.suman.expensetracker.auth.controller;
 
 import com.suman.expensetracker.dto.LoginRequestDto;
 import com.suman.expensetracker.dto.LoginResponseDto;
@@ -103,6 +103,8 @@ public class AuthController {
         BeanUtils.copyProperties(registerRequestDto, user);
         user.setEmail(normalizedEmail);
         user.setPasswordHash(passwordEncoder.encode(registerRequestDto.password()));
+        user.setCreatedAt(user.getUpdatedAt());
+        user.setUpdatedAt(user.getCreatedAt());
         expenseTrackerUserRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("message", "User Registered Successfully"));

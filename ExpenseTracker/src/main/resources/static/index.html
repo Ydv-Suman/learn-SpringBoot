@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <meta name="description" content="Minimal expense tracker interface.">
-    <link rel="stylesheet" href="/styles.css?v=4">
+    <link rel="stylesheet" href="/styles.css?v=8">
 </head>
 <body>
 <div class="shell">
     <header class="bar">
         <div>
             <p class="eyebrow">Expense Tracker</p>
-            <h1>Private categories</h1>
         </div>
         <span class="status-pill" id="session-pill">Offline</span>
     </header>
@@ -65,31 +64,66 @@
             <div class="panel-top">
                 <div>
                     <p class="kicker">Workspace</p>
-                    <h2>Your categories</h2>
+                    <h2>Organize money</h2>
                 </div>
                 <button class="ghost-button" id="logout-button" type="button">Logout</button>
             </div>
 
-            <form id="category-form" class="inline-form">
-                <label>
-                    <span>Category</span>
-                    <input type="text" name="categoryName" placeholder="Food" required>
-                </label>
-                <div class="form-actions">
-                    <button type="submit" id="category-submit-button">Add</button>
-                    <button type="button" class="ghost-button secondary hidden" id="category-cancel-button">Cancel</button>
-                </div>
-            </form>
+            <div class="segmented dashboard-switch" role="tablist" aria-label="Workspace view">
+                <button class="segment active" type="button" data-dashboard-view="categories">Categories</button>
+                <button class="segment" type="button" data-dashboard-view="lists">Lists</button>
+            </div>
 
-            <p class="message" id="category-status" aria-live="polite"></p>
+            <section class="workspace-view" id="categories-view">
+                <form id="category-form" class="inline-form">
+                    <label>
+                        <span>Category</span>
+                        <input type="text" name="categoryName" placeholder="Food" required>
+                    </label>
+                    <div class="form-actions">
+                        <button type="submit" id="category-submit-button">Add</button>
+                        <button type="button" class="ghost-button secondary hidden" id="category-cancel-button">Cancel</button>
+                    </div>
+                </form>
 
-            <ul class="list" id="category-list">
-                <li class="empty">Sign in to see your categories.</li>
-            </ul>
+                <p class="message" id="category-status" aria-live="polite"></p>
+
+                <ul class="list" id="category-list">
+                    <li class="empty">Sign in to see your categories.</li>
+                </ul>
+            </section>
+
+            <section class="workspace-view hidden" id="lists-view">
+                <form id="expense-list-form" class="list-form">
+                    <label>
+                        <span>List name</span>
+                        <input type="text" name="listName" placeholder="Groceries" required>
+                    </label>
+                    <label>
+                        <span>Category</span>
+                        <select name="categoryId" id="expense-category-select" required>
+                            <option value="">Select category</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Amount</span>
+                        <input type="number" name="amount" min="0" step="0.01" placeholder="120.00" required>
+                    </label>
+                    <button type="submit" id="expense-list-submit-button">Add list</button>
+                </form>
+
+                <p class="message" id="expense-list-status" aria-live="polite"></p>
+
+                <p class="summary" id="expense-list-total" aria-live="polite"></p>
+
+                <ul class="list expense-list-list" id="expense-list-list">
+                    <li class="empty">No expense lists yet.</li>
+                </ul>
+            </section>
         </section>
     </main>
 </div>
 
-<script src="/app.js?v=4"></script>
+<script src="/app.js?v=8"></script>
 </body>
 </html>

@@ -25,7 +25,8 @@ public class PathConfig {
     @Bean("securePaths")
     public List<String> securePaths() {
         return List.of(
-                "/categories/**"
+                "/categories/**",
+                "/expense-lists/**"
         );
     }
 

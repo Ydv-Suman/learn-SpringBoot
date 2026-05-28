@@ -1,19 +1,31 @@
 const state = {
     mode: "login",
+    dashboardView: "categories",
     csrfToken: "",
     token: localStorage.getItem("expenseTrackerToken") || "",
     user: JSON.parse(localStorage.getItem("expenseTrackerUser") || "null"),
     editingCategoryId: null,
+    categories: [],
+    expenseLists: [],
 };
 
 const elements = {
     sessionPill: document.getElementById("session-pill"),
     authPanel: document.getElementById("auth-panel"),
     dashboardPanel: document.getElementById("dashboard-panel"),
+    dashboardTabs: Array.from(document.querySelectorAll("[data-dashboard-view]")),
+    categoriesView: document.getElementById("categories-view"),
+    listsView: document.getElementById("lists-view"),
     authTitle: document.getElementById("auth-title"),
     authStatus: document.getElementById("auth-status"),
     categoryStatus: document.getElementById("category-status"),
     categoryList: document.getElementById("category-list"),
+    expenseListForm: document.getElementById("expense-list-form"),
+    expenseListStatus: document.getElementById("expense-list-status"),
+    expenseListTotal: document.getElementById("expense-list-total"),
+    expenseListList: document.getElementById("expense-list-list"),
+    expenseCategorySelect: document.getElementById("expense-category-select"),
+    expenseListSubmitButton: document.getElementById("expense-list-submit-button"),
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
     categoryForm: document.getElementById("category-form"),
@@ -46,6 +58,19 @@ function setCategoryFormMode(editingCategoryId) {
     }
 }
 
+function setDashboardView(view) {
+    state.dashboardView = view;
+    elements.dashboardTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.dashboardView === view));
+    elements.categoriesView.classList.toggle("hidden", view !== "categories");
+    elements.listsView.classList.toggle("hidden", view !== "lists");
+    if (view === "lists") {
+        renderCategoryOptions(state.categories);
+        if (state.token) {
+            loadExpenseLists();
+        }
+    }
+}
+
 function persistSession(response) {
     state.token = response.jwtToken || "";
     state.user = response.user || null;
@@ -68,7 +93,13 @@ function setView() {
     elements.dashboardPanel.classList.toggle("hidden", !isAuthed);
     if (!isAuthed) {
         setCategoryFormMode(null);
+        setDashboardView("categories");
         renderCategories([]);
+        renderExpenseLists([]);
+        setText(elements.expenseListTotal, "");
+        setText(elements.expenseListStatus, "");
+    } else {
+        setDashboardView(state.dashboardView || "categories");
     }
 }
 
@@ -134,6 +165,9 @@ async function request(url, options = {}) {
 }
 
 function renderCategories(items) {
+    state.categories = items;
+    renderCategoryOptions(items);
+
     if (!items.length) {
         elements.categoryList.innerHTML = '<li class="empty">No categories yet.</li>';
         return;
@@ -189,6 +223,48 @@ function renderCategories(items) {
     });
 }
 
+function renderCategoryOptions(items) {
+    const options = ['<option value="">Select category</option>']
+        .concat(
+            items.map(
+                (item) =>
+                    `<option value="${item.id}">${escapeHtml(item.categoryName)}</option>`
+            )
+        )
+        .join("");
+
+    elements.expenseCategorySelect.innerHTML = options;
+}
+
+function renderExpenseLists(items) {
+    state.expenseLists = items;
+
+    if (!items.length) {
+        elements.expenseListList.innerHTML = '<li class="empty">No expense lists yet.</li>';
+        return;
+    }
+
+    elements.expenseListList.innerHTML = items
+        .map(
+            (item) => `
+                <li class="expense-row">
+                    <div class="expense-copy">
+                        <span class="expense-name">${escapeHtml(item.listName)}</span>
+                    </div>
+                    <div class="expense-actions">
+                        <span class="expense-amount">${escapeHtml(formatAmount(item.amount))}</span>
+                    </div>
+                </li>
+            `
+        )
+        .join("");
+}
+
+function formatAmount(value) {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue.toFixed(2) : String(value);
+}
+
 function escapeHtml(value) {
     return String(value)
         .replaceAll("&", "&amp;")
@@ -208,6 +284,9 @@ async function loadCategories() {
         const categories = await request("/categories/all");
         renderCategories(categories);
         setText(elements.categoryStatus, `Loaded ${categories.length} categories.`);
+        if (!elements.listsView.classList.contains("hidden")) {
+            renderCategoryOptions(categories);
+        }
     } catch (error) {
         if (error.message === "Unauthorized") {
             clearSession();
@@ -216,6 +295,54 @@ async function loadCategories() {
             return;
         }
         setText(elements.categoryStatus, error.message);
+    }
+}
+
+async function loadExpenseLists() {
+    if (!state.token) {
+        renderExpenseLists([]);
+        elements.expenseListTotal.innerHTML = "";
+        return;
+    }
+
+    try {
+        const overview = await request("/expense-lists/all");
+        renderExpenseLists(overview.expenseLists || []);
+        elements.expenseListTotal.innerHTML = `
+            <span>Total Amount</span>
+            <span>${escapeHtml(formatAmount(overview.totalAmount || 0))}</span>
+        `;
+        setText(elements.expenseListStatus, "");
+    } catch (error) {
+        if (error.message === "Unauthorized") {
+            clearSession();
+            setView();
+            setText(elements.authStatus, "Session expired. Sign in again.");
+            return;
+        }
+        setText(elements.expenseListStatus, error.message);
+    }
+}
+
+async function handleExpenseListSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setText(elements.expenseListStatus, "Saving...");
+
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload.amount = Number(payload.amount);
+    payload.categoryId = Number(payload.categoryId);
+
+    try {
+        await request("/expense-lists/add", {
+            method: "POST",
+            body: JSON.stringify(payload),
+        });
+        resetForm(form);
+        setText(elements.expenseListStatus, "Expense list created successfully.");
+        await loadExpenseLists();
+    } catch (error) {
+        setText(elements.expenseListStatus, error.message);
     }
 }
 
@@ -236,6 +363,7 @@ async function handleLogin(event) {
         setText(elements.authStatus, response.message || "Signed in.");
         resetForm(form);
         await loadCategories();
+        await loadExpenseLists();
     } catch (error) {
         setText(elements.authStatus, error.message);
     }
@@ -295,9 +423,14 @@ elements.tabs.forEach((tab) => {
     tab.addEventListener("click", () => setMode(tab.dataset.mode));
 });
 
+elements.dashboardTabs.forEach((tab) => {
+    tab.addEventListener("click", () => setDashboardView(tab.dataset.dashboardView));
+});
+
 elements.loginForm.addEventListener("submit", handleLogin);
 elements.registerForm.addEventListener("submit", handleRegister);
 elements.categoryForm.addEventListener("submit", handleCategorySubmit);
+elements.expenseListForm.addEventListener("submit", handleExpenseListSubmit);
 elements.categoryCancelButton.addEventListener("click", () => {
     resetForm(elements.categoryForm);
     setCategoryFormMode(null);
@@ -315,5 +448,6 @@ elements.logoutButton.addEventListener("click", () => {
 
     if (state.token) {
         await loadCategories();
+        await loadExpenseLists();
     }
 })();

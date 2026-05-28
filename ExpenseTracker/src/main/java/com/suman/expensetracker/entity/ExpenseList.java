@@ -3,12 +3,15 @@ package com.suman.expensetracker.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -28,8 +31,9 @@ public class ExpenseList extends BaseEntity {
 
 
     @NotNull
+    @DecimalMin(value = "0.0", inclusive = true)
     @Column(name = "AMOUNT", nullable = false)
-    private Double amount;
+    private BigDecimal amount;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

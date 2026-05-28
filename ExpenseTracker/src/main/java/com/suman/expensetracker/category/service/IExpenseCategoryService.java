@@ -9,9 +9,9 @@ public interface IExpenseCategoryService {
 
     List<ExpenseCategoryResponseDto> getAllCategories();
 
-    ExpenseCategoryResponseDto addCategory(ExpenseCategoryRequestDto requestDto);
+    void addCategory(ExpenseCategoryRequestDto requestDto);
 
-    ExpenseCategoryResponseDto updateCategory(Long id, ExpenseCategoryRequestDto requestDto);
+    void updateCategory(Long id, ExpenseCategoryRequestDto requestDto);
 
     void deleteCategory(Long id);
 

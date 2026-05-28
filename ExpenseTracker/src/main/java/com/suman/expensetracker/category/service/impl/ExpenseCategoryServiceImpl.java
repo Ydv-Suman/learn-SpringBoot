@@ -6,11 +6,9 @@ import com.suman.expensetracker.dto.ExpenseCategoryResponseDto;
 import com.suman.expensetracker.entity.ExpenseCategory;
 import com.suman.expensetracker.entity.ExpenseTrackerUser;
 import com.suman.expensetracker.repository.ExpenseCategoryRepository;
-import com.suman.expensetracker.repository.ExpenseTrackerUserRepository;
+import com.suman.expensetracker.security.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -21,11 +19,11 @@ import java.util.List;
 public class ExpenseCategoryServiceImpl implements IExpenseCategoryService {
 
     private final ExpenseCategoryRepository expenseCategoryRepository;
-    private final ExpenseTrackerUserRepository expenseTrackerUserRepository;
+    private final CurrentUserService currentUserService;
 
     @Override
     public List<ExpenseCategoryResponseDto> getAllCategories() {
-        ExpenseTrackerUser currentUser = getCurrentUser();
+        ExpenseTrackerUser currentUser = currentUserService.getCurrentUser();
         return expenseCategoryRepository.findAllByExpenseTrackerUser_EmailOrderByCategoryNameAsc(currentUser.getEmail())
                 .stream()
                 .map(category -> new ExpenseCategoryResponseDto(category.getId(), category.getCategoryName()))
@@ -33,8 +31,8 @@ public class ExpenseCategoryServiceImpl implements IExpenseCategoryService {
     }
 
     @Override
-    public ExpenseCategoryResponseDto addCategory(ExpenseCategoryRequestDto requestDto) {
-        ExpenseTrackerUser currentUser = getCurrentUser();
+    public void addCategory(ExpenseCategoryRequestDto requestDto) {
+        ExpenseTrackerUser currentUser = currentUserService.getCurrentUser();
         String normalizedName = requestDto.categoryName().trim();
         expenseCategoryRepository.findByExpenseTrackerUser_EmailAndCategoryNameIgnoreCase(currentUser.getEmail(), normalizedName)
                 .ifPresent(category -> {
@@ -44,13 +42,12 @@ public class ExpenseCategoryServiceImpl implements IExpenseCategoryService {
         ExpenseCategory category = new ExpenseCategory();
         category.setCategoryName(normalizedName);
         category.setExpenseTrackerUser(currentUser);
-        ExpenseCategory savedCategory = expenseCategoryRepository.save(category);
-        return new ExpenseCategoryResponseDto(savedCategory.getId(), savedCategory.getCategoryName());
+        expenseCategoryRepository.save(category);
     }
 
     @Override
-    public ExpenseCategoryResponseDto updateCategory(Long id, ExpenseCategoryRequestDto requestDto) {
-        ExpenseTrackerUser currentUser = getCurrentUser();
+    public void updateCategory(Long id, ExpenseCategoryRequestDto requestDto) {
+        ExpenseTrackerUser currentUser = currentUserService.getCurrentUser();
         ExpenseCategory category = expenseCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
@@ -66,29 +63,17 @@ public class ExpenseCategoryServiceImpl implements IExpenseCategoryService {
                 });
 
         category.setCategoryName(normalizedName);
-        ExpenseCategory updatedCategory = expenseCategoryRepository.save(category);
-        return new ExpenseCategoryResponseDto(updatedCategory.getId(), updatedCategory.getCategoryName());
+        expenseCategoryRepository.save(category);
     }
 
     @Override
     public void deleteCategory(Long id) {
-        ExpenseTrackerUser currentUser = getCurrentUser();
+        ExpenseTrackerUser currentUser = currentUserService.getCurrentUser();
         ExpenseCategory category = expenseCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
         if (!category.getExpenseTrackerUser().getEmail().equals(currentUser.getEmail())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
         }
         expenseCategoryRepository.delete(category);
-    }
-
-
-    private ExpenseTrackerUser getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not authenticated");
-        }
-
-        return expenseTrackerUserRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authenticated user not found"));
     }
 }

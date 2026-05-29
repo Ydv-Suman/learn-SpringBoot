@@ -21,9 +21,15 @@ public class ExceptionAuditAspect {
         String methodName = joinPoint.getSignature().toShortString();
         Object[] methodArgs = joinPoint.getArgs();
 
-        log.error("Exception occurred in method: {}", methodName);
-        log.error("Arguments: {}", Arrays.toString(methodArgs));
-        log.error("Exception type: {}", ex.getClass().getSimpleName());
-        log.error("Exception message: {}", ex.getMessage());
+        log.error("❌ Exception occurred in method: {}", methodName);
+        log.error("📥 Arguments: {}", Arrays.toString(methodArgs));
+        log.error("💥 Exception type: {}", ex.getClass().getSimpleName());
+        log.error("🧾 Exception message: {}", ex.getMessage());
+
+        // Here you could also:
+        // - Send metrics
+        // - Push audit events
+        // - Trigger alerts
     }
+
 }

@@ -3,6 +3,7 @@ package com.eazybytes.jobportal.security;
 import com.eazybytes.jobportal.entity.JobPortalUser;
 import com.eazybytes.jobportal.repository.JobPortalUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,7 +24,7 @@ public class JobPortalUsernamePwdAuthenticationProvider implements Authenticatio
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public @Nullable Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
         JobPortalUser jobPortalUser = jobPortalUserRepository.findJobPortalUserByEmail(username)
@@ -41,6 +42,6 @@ public class JobPortalUsernamePwdAuthenticationProvider implements Authenticatio
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
+        return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
     }
 }

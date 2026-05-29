@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -27,7 +28,6 @@ public class JwtUtil {
         SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         var fetchedUser = (JobPortalUser) authentication.getPrincipal();
         jwtToken = Jwts.builder().issuer("Job Portal").subject("JWT Token")
-                .claim("username", fetchedUser.getEmail())
                 .claim("name", fetchedUser.getName())
                 .claim("email", fetchedUser.getEmail())
                 .claim("mobileNumber", fetchedUser.getMobileNumber())

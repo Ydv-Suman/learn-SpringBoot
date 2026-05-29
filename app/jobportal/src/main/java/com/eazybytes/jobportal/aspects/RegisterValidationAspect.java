@@ -33,15 +33,15 @@ public class RegisterValidationAspect {
     public void validateBeforeRegister(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         RegisterRequestDto request = (RegisterRequestDto) args[0];
-        log.info("Validating user registration request");
+        log.info("🔍 Validating user registration request");
         Map<String, String> errors = new HashMap<>();
-
+        // 1️⃣ Compromised password check
         CompromisedPasswordDecision decision =
                 compromisedPasswordChecker.check(request.password());
         if (decision.isCompromised()) {
             errors.put("password", "Choose a strong password");
         }
-
+        // 2️⃣ Existing user check
         Optional<JobPortalUser> existingUser =
                 jobPortalUserRepository.readUserByEmailOrMobileNumber(
                         request.email(), request.mobileNumber());
@@ -58,11 +58,13 @@ public class RegisterValidationAspect {
             }
         }
 
+        // 3️⃣ Stop execution if validation fails
         if (!errors.isEmpty()) {
-            log.warn("Registration validation failed: {}", errors);
+            log.warn("❌ Registration validation failed: {}", errors);
             throw new RegistrationValidationException(errors);
         }
 
-        log.info("Registration validation passed");
+        log.info("✅ Registration validation passed");
     }
+
 }

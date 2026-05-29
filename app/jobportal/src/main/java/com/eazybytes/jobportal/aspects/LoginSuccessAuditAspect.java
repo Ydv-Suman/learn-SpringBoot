@@ -18,6 +18,7 @@ public class LoginSuccessAuditAspect {
             returning = "response"
     )
     public void logSuccessfulLogin(JoinPoint joinPoint, Object response) {
+
         if (!(response instanceof ResponseEntity<?> responseEntity)) {
             return;
         }
@@ -25,10 +26,12 @@ public class LoginSuccessAuditAspect {
         if (!(body instanceof LoginResponseDto loginResponse)) {
             return;
         }
+        // Only log if login is really successful
         if (loginResponse.user() != null) {
-            String username = loginResponse.user().getEmail();
+            String username = loginResponse.user().getEmail(); // or username
             String role = loginResponse.user().getRole();
-            log.info("LOGIN SUCCESS | User: {} | Role: {}", username, role);
+            log.info("✅ LOGIN SUCCESS | User: {} | Role: {}", username, role);
         }
     }
+
 }

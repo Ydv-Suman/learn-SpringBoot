@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <!-- ===================== -->
+    <!-- Environment-safe log path -->
+    <!-- ===================== -->
     <property name="LOGS" value="${LOG_PATH:-./logs}" />
 
+    <!-- ===================== -->
+    <!-- Console Appender -->
+    <!-- ===================== -->
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -12,6 +18,9 @@
         </encoder>
     </appender>
 
+    <!-- ===================== -->
+    <!-- Rolling File Appender -->
+    <!-- ===================== -->
     <appender name="RollingFile"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
 
@@ -23,6 +32,7 @@
             </pattern>
         </encoder>
 
+        <!-- Modern rolling policy (size + time based) -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>
                 ${LOGS}/archived/jobportal-%d{yyyy-MM-dd}.%i.log
@@ -33,11 +43,17 @@
         </rollingPolicy>
     </appender>
 
+    <!-- ===================== -->
+    <!-- Root Logger -->
+    <!-- ===================== -->
     <root level="INFO">
         <appender-ref ref="RollingFile"/>
         <appender-ref ref="Console"/>
     </root>
 
+    <!-- ===================== -->
+    <!-- Application-specific ERROR logs -->
+    <!-- ===================== -->
     <logger name="com.eazybytes.jobportal"
             level="INFO"
             additivity="false">

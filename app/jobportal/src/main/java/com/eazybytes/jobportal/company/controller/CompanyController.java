@@ -1,5 +1,6 @@
 package com.eazybytes.jobportal.company.controller;
 
+import com.eazybytes.jobportal.aspects.LogAspect;
 import com.eazybytes.jobportal.dto.CompanyDto;
 import com.eazybytes.jobportal.company.service.ICompanyService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class CompanyController {
 
     private final ICompanyService companyService;
 
+    // @LogAspect
     @GetMapping(path = "/public", version = "1.0")
     public ResponseEntity<List<CompanyDto>> getAllCompanies() {
         List<CompanyDto> companyList = companyService.getAllCompanies();

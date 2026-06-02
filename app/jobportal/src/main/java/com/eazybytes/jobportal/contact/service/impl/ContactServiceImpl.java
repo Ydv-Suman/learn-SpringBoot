@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.time.Instant;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +78,7 @@ public class ContactServiceImpl implements IContactService {
     @Override
     public boolean closeContactMsg(Long id, String status) {
         int updatedRows = contactRepository.updateStatusById(
-                status, id, Instant.now(), ApplicationUtility.getLoggedInUser());
+                status, id, ApplicationUtility.getLoggedInUser());
         return updatedRows > 0;
     }
 

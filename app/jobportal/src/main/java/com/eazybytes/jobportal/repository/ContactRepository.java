@@ -6,9 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
 import java.util.List;
 
 public interface ContactRepository extends JpaRepository<Contact, Long> {
@@ -22,8 +22,8 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     Page<Contact> findContactsByStatus(String status, Pageable pageable);
 
     @Modifying
+    @Query(name = "Contact.updateStatusById", nativeQuery = true)
     int updateStatusById(@Param("status") String status, @Param("id") Long id,
-            @Param("updatedAt") Instant updatedAt,
             @Param("updatedBy") String updatedBy);
 
 }

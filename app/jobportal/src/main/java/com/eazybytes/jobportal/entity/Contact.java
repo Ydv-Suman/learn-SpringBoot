@@ -6,8 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
+import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,10 +15,14 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "Contact.updateStatusById",
-                query = "UPDATE Contact c SET c.status = :status, c.updatedAt = :updatedAt, c.updatedBy = :updatedBy WHERE c.id = :id")
-})
+@NamedNativeQuery(name = "Contact.updateStatusById",
+        query = """
+                UPDATE contacts
+                SET status = :status,
+                    updated_at = CURRENT_TIMESTAMP,
+                    updated_by = :updatedBy
+                WHERE id = :id
+                """)
 @Table(name = "contacts")
 public class Contact extends BaseEntity {
     @Id

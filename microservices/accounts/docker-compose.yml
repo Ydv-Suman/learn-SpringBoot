@@ -1,0 +1,40 @@
+services:
+  accounts:
+    image: "sumanydv/accounts:v1"
+    container_name: accounts-ms
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - smallBank
+
+  loans:
+    image: "sumanydv/loans:v1"
+    container_name: loans-ms
+    ports:
+      - "8090:8090"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - smallBank
+
+  cards:
+    image: "sumanydv/cards:v1"
+    container_name: cards-ms
+    ports:
+      - "9000:9000"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - smallBank
+
+networks:
+  smallBank:
+    driver: bridge

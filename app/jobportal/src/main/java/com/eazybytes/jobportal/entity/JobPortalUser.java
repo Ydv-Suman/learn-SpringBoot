@@ -9,7 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,6 +21,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -56,6 +63,18 @@ public class JobPortalUser extends BaseEntity {
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "company_id")
     private Company company;
+
+    @OneToOne(mappedBy = "user")
+    private Profile profile;
+
+    @ManyToMany
+    @JoinTable(name = "saved_jobs",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "job_id")})
+    private Set<Job> savedJobs = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<JobApplication> jobApplications = new LinkedHashSet<>();
 
 
 }

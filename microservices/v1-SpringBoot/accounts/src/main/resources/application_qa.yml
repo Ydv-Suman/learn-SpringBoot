@@ -1,0 +1,16 @@
+spring:
+  config:
+    activate:
+      on-profile: "qa"
+
+build:
+  version: "2.0"
+
+accounts:
+  message: "Welcome to SmallBank accounts related QA APIs "
+  contactDetails:
+    name: "Roman Doe - QA Lead"
+    email: "roman@eazybank.com"
+  onCallSupport:
+    - (666) 555-1234
+    - (666) 523-1345

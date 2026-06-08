@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+
+build:
+  version: "1.0"
+
+cards:
+  message: "Welcome to Cards for prod"
+  contactDetails:
+    name: "Boyd"
+    email: "boyd@simplebank.com"
+  onCallSupport:
+    -(555)-555-5555

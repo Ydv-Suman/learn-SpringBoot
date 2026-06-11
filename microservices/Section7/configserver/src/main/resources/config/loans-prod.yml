@@ -1,0 +1,10 @@
+build:
+  version: "1.0"
+
+loans:
+  message: "Welcome to Loans for prod"
+  contactDetails:
+    name: "Boyd"
+    email: "boyd@simplebank.com"
+  onCallSupport:
+    - (555) 555-5555

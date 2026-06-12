@@ -29,9 +29,8 @@ services:
       file: common-config.yml
       service: microservice-db-config
 
-
   configserver:
-    image: "sumanydv/configserver:v2"
+    image: "sumanydv/configserver:v3"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -45,8 +44,28 @@ services:
       file: common-config.yml
       service: microservice-base-config
 
+  eurekaserver:
+    image: "sumanydv/eurekaserver:v3"
+    container_name: eurekaserver-ms
+    ports:
+      - "8070:8070"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8070 && printf \"GET /actuator/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3 && cat <&3 | grep -q \"\\\"status\\\":\\\"UP\\\"\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+
   accounts:
-    image: "sumanydv/accounts:v2"
+    image: "sumanydv/accounts:v3"
     container_name: accounts-ms
     ports:
       - "8080:8080"
@@ -58,25 +77,25 @@ services:
         condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eurekaserver-config
 
   loans:
-    image: "sumanydv/loans:v2"
+    image: "sumanydv/loans:v3"
     container_name: loans-ms
     ports:
       - "8090:8090"
     environment:
       SPRING_APPLICATION_NAME: "loans"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
     depends_on:
-      laonsdb:
+      loansdb:
         condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eurekaserver-config
 
   cards:
-    image: "sumanydv/cards:v2"
+    image: "sumanydv/cards:v3"
     container_name: cards-ms
     ports:
       - "9000:9000"
@@ -88,7 +107,7 @@ services:
         condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eurekaserver-config
 
 networks:
   smallBank:

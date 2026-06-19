@@ -125,7 +125,7 @@
 				<version>3.5.1</version>
 				<configuration>
 					<to>
-						<image>sumanydv/${project.artifactId}:v4</image>
+						<image>sumanydv/${project.artifactId}:v5</image>
 					</to>
 				</configuration>
 			</plugin>

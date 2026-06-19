@@ -1,4 +1,17 @@
 services:
+  redis:
+    image: "redis"
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
   accountsdb:
     container_name: "accountsdb"
     ports:
@@ -30,7 +43,7 @@ services:
       service: microservice-db-config
 
   configserver:
-    image: "sumanydv/configserver:v4"
+    image: "sumanydv/configserver:v5"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -45,7 +58,7 @@ services:
       service: microservice-base-config
 
   eurekaserver:
-    image: "sumanydv/eurekaserver:v4"
+    image: "sumanydv/eurekaserver:v5"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
@@ -65,7 +78,7 @@ services:
       SPRING_APPLICATION_NAME: "eurekaserver"
 
   accounts:
-    image: "sumanydv/accounts:v4"
+    image: "sumanydv/accounts:v5"
     container_name: accounts-ms
     ports:
       - "8080:8080"
@@ -86,7 +99,7 @@ services:
       service: microservice-eurekaserver-config
 
   loans:
-    image: "sumanydv/loans:v4"
+    image: "sumanydv/loans:v5"
     container_name: loans-ms
     ports:
       - "8090:8090"
@@ -107,7 +120,7 @@ services:
       service: microservice-eurekaserver-config
 
   cards:
-    image: "sumanydv/cards:v4"
+    image: "sumanydv/cards:v5"
     container_name: cards-ms
     ports:
       - "9000:9000"
@@ -128,7 +141,7 @@ services:
       service: microservice-eurekaserver-config
 
   gateway:
-    image: "sumanydv/gatewayserver:v4"
+    image: "sumanydv/gatewayserver:v5"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
@@ -139,11 +152,18 @@ services:
         condition: service_healthy
       loans:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     extends:
       file: common-config.yml
       service: microservice-eurekaserver-config
     environment:
       SPRING_APPLICATION_NAME: "gatewayserver"
+      SPRING_DATA_REDIS_CONNECT_TIMEOUT: 2s
+      SPRING-DATA_REDIS_HOST: redis
+      SPRING-DATA_REDIS_PORT: 6379
+      SPRING-DATA_REDIS_TIMEOUT: 1S
+
 
 networks:
   smallBank:

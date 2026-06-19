@@ -78,3 +78,28 @@ resilience4j.circuitbreaker:
       permittedNumberOfCallsInHalfOpenState: 2
       failureRateThreshold: 50
       waitDurationInOpenState: 10000
+
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 3
+      waitDuration: 500
+      enableExponentialBackoff: true
+      exponentialBackoffMultiplier: 2
+      ignoreExceptions:
+        - java.lang.NullPointerException
+      retryExceptions:
+        - java.util.concurrent.TimeoutException
+  instances:
+    getBuildInfo:
+      baseConfig: default
+
+resilience4j.ratelimiter:
+  configs:
+    default:
+      limitForPeriod: 1
+      limitRefreshPeriod: 5000
+      timeoutDuration: 1000
+  instances:
+    getJavaVersion:
+      baseConfig: default

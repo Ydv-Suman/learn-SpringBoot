@@ -1,0 +1,11 @@
+build:
+  version: "2.0"
+
+loans:
+  message: "Welcome to Loans for QA"
+  contactDetails:
+    name: "Alex - QA Lead"
+    email: "alex@simplebank.com"
+  onCallSupport:
+    - (333) 333-3333
+    - (444) 444-4444

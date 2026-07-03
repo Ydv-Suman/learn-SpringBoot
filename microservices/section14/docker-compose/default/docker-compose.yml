@@ -12,36 +12,6 @@ services:
       file: common-config.yml
       service: network-deploy-service
       
-  accountsdb:
-    container_name: "accountsdb"
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: accountsdb
-    extends:
-      file: common-config.yml
-      service: microservice-db-config
-
-  cardsdb:
-    container_name: "cardsdb"
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_DATABASE: cardsdb
-    extends:
-      file: common-config.yml
-      service: microservice-db-config
-
-  loansdb:
-    container_name: "loansdb"
-    ports:
-      - "3308:3306"
-    environment:
-      MYSQL_DATABASE: loansdb
-    extends:
-      file: common-config.yml
-      service: microservice-db-config
-
   configserver:
     image: "sumanydv/configserver:v5"
     container_name: configserver-ms
@@ -90,10 +60,7 @@ services:
       start_period: 10s
     environment:
       SPRING_APPLICATION_NAME: "accounts"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
-    depends_on:
-      accountsdb:
-        condition: service_healthy
+      SPRING_DATASOURCE_URL: "jdbc:h2:mem:accountsdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
     extends:
       file: common-config.yml
       service: microservice-eurekaserver-config
@@ -111,10 +78,7 @@ services:
       start_period: 10s
     environment:
       SPRING_APPLICATION_NAME: "loans"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
-    depends_on:
-      loansdb:
-        condition: service_healthy
+      SPRING_DATASOURCE_URL: "jdbc:h2:mem:loansdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
     extends:
       file: common-config.yml
       service: microservice-eurekaserver-config
@@ -132,10 +96,7 @@ services:
       start_period: 10s
     environment:
       SPRING_APPLICATION_NAME: "cards"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
-    depends_on:
-      cardsdb:
-        condition: service_healthy
+      SPRING_DATASOURCE_URL: "jdbc:h2:mem:cardsdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
     extends:
       file: common-config.yml
       service: microservice-eurekaserver-config
